@@ -1,0 +1,23 @@
+<library path="nav2_custom_bt_plugins">
+
+  <class
+    name="BatteryMonitor"
+    type="nav2_custom_bt_plugins::BatteryMonitor"
+    base_class_type="BT::ConditionNode"/>
+
+  <class
+    name="CrowdStop"
+    type="nav2_custom_bt_plugins::CrowdStop"
+    base_class_type="BT::ConditionNode"/>
+
+  <class
+    name="ObstacleSlowdown"
+    type="nav2_custom_bt_plugins::ObstacleSlowdown"
+    base_class_type="BT::DecoratorNode"/>
+
+  <class
+    name="ReturnToDock"
+    type="nav2_custom_bt_plugins::ReturnToDock"
+    base_class_type="BT::SyncActionNode"/>
+
+</library>
