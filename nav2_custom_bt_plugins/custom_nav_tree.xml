@@ -3,11 +3,13 @@
 
     <Fallback>
 
-      <BatteryLow threshold="0.15"/>
-      <ReturnToDock dock_pose="{dock}"/>
+      <Sequence>
+        <BatteryMonitor threshold="0.15"/>
+        <ReturnToDock dock_pose="{dock}"/>
+      </Sequence>
 
       <PipelineSequence>
-        <CrowdStop density="0.8"/>
+        <CrowdStop density_threshold="0.8"/>
         <ObstacleSlowdown distance="0.6"/>
         <ComputePathToPose/>
         <FollowPath/>
