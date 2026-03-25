@@ -1,4 +1,4 @@
-# Nav2BTPlugin 
+# Nav2BTPlugin  
 
 Battery-Aware, Obstacle-Conscious Navigation in Nav2 Using Behaviour Tree Plugins
 
