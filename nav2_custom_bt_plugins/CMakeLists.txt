@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(nav2_custom_bt_plugins)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
@@ -31,6 +34,7 @@ add_library(nav2_custom_bt_plugins SHARED
   src/crowd_stop.cpp
   src/obstacle_slowdown.cpp
   src/return_to_dock.cpp
+  src/plugin_registration.cpp
 )
 
 ament_target_dependencies(nav2_custom_bt_plugins
@@ -44,7 +48,24 @@ pluginlib_export_plugin_description_file(nav2_behavior_tree plugin.xml)
 
 install(
   TARGETS nav2_custom_bt_plugins
+  EXPORT export_nav2_custom_bt_plugins
+  ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
+
+install(
+  FILES plugin.xml
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY behavior_trees/
+  DESTINATION share/${PROJECT_NAME}/behavior_trees
+)
+
+ament_export_libraries(nav2_custom_bt_plugins)
+ament_export_targets(export_nav2_custom_bt_plugins)
+ament_export_dependencies(pluginlib)
 
 ament_package()

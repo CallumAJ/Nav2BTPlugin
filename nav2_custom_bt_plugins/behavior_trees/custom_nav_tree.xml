@@ -1,0 +1,28 @@
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+
+    <Fallback name="MainFallback">
+
+      <!-- If battery low, go dock -->
+      <Sequence>
+        <BatteryMonitor threshold="0.15"/>
+        <ReturnToDock dock_pose="dock"/>
+      </Sequence>
+
+      <!-- Otherwise navigate normally -->
+      <PipelineSequence name="NavigateWithSafety">
+
+        <CrowdStop density_threshold="0.8"/>
+
+        <ComputePathToPose goal="{goal}" path="{path}"/>
+
+        <ObstacleSlowdown slowdown_distance="0.5">
+          <FollowPath path="{path}"/>
+        </ObstacleSlowdown>
+
+      </PipelineSequence>
+
+    </Fallback>
+
+  </BehaviorTree>
+</root>
