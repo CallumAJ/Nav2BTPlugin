@@ -11,19 +11,12 @@ ros2 run nav2_bt_project battery_simulator --ros-args \
   -p initial_battery_level:=1.0 -p drain_rate:=0.005 -p use_sim_time:=true
 ```
 
-### Speed Limit May Not Affect DWB Controller
-ObstacleSlowdown publishes to `/speed_limit` (`nav2_msgs/msg/SpeedLimit`), but Nav2's default DWB local planner does not natively subscribe to this topic. The messages are published correctly, but actual velocity reduction depends on controller configuration. Options to fix:
-
-- Switch to `RegulatedPurePursuitController`, which reads `/speed_limit` out of the box
-- Add a `SpeedController` BT decorator from Nav2's built-in plugins
-- Write a velocity scaling node that subscribes to `/speed_limit` and scales `/cmd_vel`
-
 ### CrowdStop Is Hard to Trigger
-The default density threshold of 0.8 requires 80% of laser scan points to be within 1.0m. This rarely happens in the turtlebot3_world map. The plugin logic is correct but the threshold is too high for practical testing in open environments.
+The default density threshold of 0.8 requires 80% of laser scan points to be within the proximity distance. This rarely happens in the turtlebot3_world map. The plugin logic is correct but the threshold is too high for practical testing in open environments.
 
 **Possible fixes:**
 - Lower `density_threshold` in the behavior tree XML (e.g., 0.4)
-- Make `proximity_distance` a configurable BT input port instead of hardcoded at 1.0m
+- Increase `proximity_distance` in the XML (e.g., 1.5 or 2.0)
 - Test in a custom world with tighter corridors
 
 ## Improvements
@@ -46,16 +39,8 @@ The `nav2_bt_project` package (launch files, params, battery simulator, behavior
 - `params/fastdds_profile.xml` — new file for container DDS compatibility
 - `setup.py` — updated to install XML params files
 
-### Clean Up Stale project/ Directory
-`/workspaces/ros2_ws/project/` contains old copies of both packages with a `COLCON_IGNORE` marker. This directory should be deleted to avoid confusion.
+## Resolved
 
-### Make CrowdStop proximity_distance Configurable
-Currently `proximity_distance_` is hardcoded to 1.0m in `crowd_stop.cpp`. Adding it as a BT input port would allow tuning per-environment:
-
-```xml
-<CrowdStop density_threshold="0.5" proximity_distance="1.5"/>
-```
-
-Requires changes to:
-- `crowd_stop.hpp` — remove hardcoded value
-- `crowd_stop.cpp` — read from input port in constructor, add to `providedPorts()`
+- ~~Speed Limit May Not Affect DWB Controller~~ — Verified: Nav2's controller_server subscribes to `/speed_limit` and DWB's `setSpeedLimit()` delegates to the trajectory generator. The speed limit chain works correctly.
+- ~~Make CrowdStop proximity_distance Configurable~~ — Implemented: `proximity_distance` is now a BT input port in `crowd_stop.cpp` and `providedPorts()`.
+- ~~Clean Up Stale project/ Directory~~ — Deleted `/workspaces/ros2_ws/project/`. Proposal PDF preserved in Nav2BTPlugin root.
