@@ -10,9 +10,12 @@
 
       <PipelineSequence>
         <CrowdStop density_threshold="0.8"/>
-        <ObstacleSlowdown distance="0.6"/>
-        <ComputePathToPose/>
-        <FollowPath/>
+        <ObstacleSlowdown distance="0.6">
+          <Sequence>
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+            <FollowPath path="{path}" controller_id="FollowPath"/>
+          </Sequence>
+        </ObstacleSlowdown>
       </PipelineSequence>
 
     </Fallback>
