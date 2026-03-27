@@ -1,24 +1,49 @@
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
 
-    <Fallback>
+    <ReactiveFallback>
 
+      <!-- Priority 1: Low battery -> return to dock -->
       <Sequence>
         <BatteryMonitor threshold="0.15"/>
-        <ReturnToDock dock_pose="{dock}"/>
-      </Sequence>
-
-      <PipelineSequence>
-        <CrowdStop density_threshold="0.8"/>
-        <ObstacleSlowdown distance="0.6">
-          <Sequence>
+        <ReturnToDock dock_pose="0.0;0.0;0.0"/>
+        <RecoveryNode number_of_retries="3" name="DockRecovery">
+          <PipelineSequence>
             <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
             <FollowPath path="{path}" controller_id="FollowPath"/>
+          </PipelineSequence>
+          <Sequence>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Dock"
+              service_name="/global_costmap/clear_entirely_global_costmap"/>
+            <ClearEntireCostmap name="ClearLocalCostmap-Dock"
+              service_name="/local_costmap/clear_entirely_local_costmap"/>
           </Sequence>
-        </ObstacleSlowdown>
-      </PipelineSequence>
+        </RecoveryNode>
+      </Sequence>
 
-    </Fallback>
+      <!-- Priority 2: Normal navigation with safety checks -->
+      <Sequence>
+        <!-- CrowdStop returns SUCCESS when safe (density below threshold), -->
+        <!-- FAILURE when too crowded (density above threshold) -->
+        <CrowdStop density_threshold="0.4" proximity_distance="1.5"/>
+
+        <ObstacleSlowdown distance="0.6">
+          <RecoveryNode number_of_retries="3" name="NavigateRecovery">
+            <PipelineSequence>
+              <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+              <FollowPath path="{path}" controller_id="FollowPath"/>
+            </PipelineSequence>
+            <Sequence>
+              <ClearEntireCostmap name="ClearGlobalCostmap"
+                service_name="/global_costmap/clear_entirely_global_costmap"/>
+              <ClearEntireCostmap name="ClearLocalCostmap"
+                service_name="/local_costmap/clear_entirely_local_costmap"/>
+            </Sequence>
+          </RecoveryNode>
+        </ObstacleSlowdown>
+      </Sequence>
+
+    </ReactiveFallback>
 
   </BehaviorTree>
 </root>

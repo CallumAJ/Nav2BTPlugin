@@ -18,14 +18,20 @@ find_package(rclcpp_action REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
+  find_package(ament_cmake_gtest REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  ament_add_gtest(test_plugins test/test_plugins.cpp)
+  target_link_libraries(test_plugins nav2_custom_bt_plugins)
+  ament_target_dependencies(test_plugins
+    rclcpp
+    behaviortree_cpp_v3
+    sensor_msgs
+    geometry_msgs
+    nav2_msgs
+  )
 endif()
 
 include_directories(include)

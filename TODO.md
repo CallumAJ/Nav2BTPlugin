@@ -11,25 +11,7 @@ ros2 run nav2_bt_project battery_simulator --ros-args \
   -p initial_battery_level:=1.0 -p drain_rate:=0.005 -p use_sim_time:=true
 ```
 
-### CrowdStop Is Hard to Trigger
-The default density threshold of 0.8 requires 80% of laser scan points to be within the proximity distance. This rarely happens in the turtlebot3_world map. The plugin logic is correct but the threshold is too high for practical testing in open environments.
-
-**Possible fixes:**
-- Lower `density_threshold` in the behavior tree XML (e.g., 0.4)
-- Increase `proximity_distance` in the XML (e.g., 1.5 or 2.0)
-- Test in a custom world with tighter corridors
-
 ## Improvements
-
-### Add Unit Tests
-The plugins have no automated tests. Adding gtest-based tests with mock ROS publishers would catch regressions and make the project more robust.
-
-Tests to write:
-- BatteryMonitor returns SUCCESS when battery message is below threshold
-- BatteryMonitor returns FAILURE when no message received yet
-- CrowdStop returns FAILURE when density exceeds threshold
-- ObstacleSlowdown publishes correct speed scale values
-- ReturnToDock correctly parses "x;y;theta" and sets blackboard goal
 
 ### Push nav2_bt_project Changes
 The `nav2_bt_project` package (launch files, params, battery simulator, behavior tree XML) has been modified but not pushed to a remote repository. Key changes that need to be tracked:
@@ -42,5 +24,7 @@ The `nav2_bt_project` package (launch files, params, battery simulator, behavior
 ## Resolved
 
 - ~~Speed Limit May Not Affect DWB Controller~~ — Verified: Nav2's controller_server subscribes to `/speed_limit` and DWB's `setSpeedLimit()` delegates to the trajectory generator. The speed limit chain works correctly.
-- ~~Make CrowdStop proximity_distance Configurable~~ — Implemented: `proximity_distance` is now a BT input port in `crowd_stop.cpp` and `providedPorts()`.
+- ~~Make CrowdStop proximity_distance Configurable~~ — Implemented as a BT input port in `crowd_stop.cpp`.
 - ~~Clean Up Stale project/ Directory~~ — Deleted `/workspaces/ros2_ws/project/`. Proposal PDF preserved in Nav2BTPlugin root.
+- ~~Add Unit Tests~~ — Added 11 gtest-based tests in `test/test_plugins.cpp` covering all 4 plugins: BatteryMonitor (3 tests), CrowdStop (3 tests), ReturnToDock (2 tests), ObstacleSlowdown (3 tests). All passing.
+- ~~CrowdStop Is Hard to Trigger~~ — Lowered `density_threshold` from 0.8 to 0.4 and increased `proximity_distance` from 1.0m to 1.5m in the behavior tree XML for practical testing.

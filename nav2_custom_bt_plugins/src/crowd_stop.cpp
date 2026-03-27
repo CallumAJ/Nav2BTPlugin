@@ -14,6 +14,7 @@ CrowdStop::CrowdStop(
   proximity_distance_(1.0)
 {
   getInput("density_threshold", density_threshold_);
+  getInput("proximity_distance", proximity_distance_);
 
   node_ = config.blackboard->get<rclcpp::Node::SharedPtr>("node");
   scan_sub_ = node_->create_subscription<sensor_msgs::msg::LaserScan>(
@@ -27,7 +28,10 @@ CrowdStop::CrowdStop(
 
 BT::PortsList CrowdStop::providedPorts()
 {
-  return { BT::InputPort<double>("density_threshold") };
+  return {
+    BT::InputPort<double>("density_threshold"),
+    BT::InputPort<double>("proximity_distance")
+  };
 }
 
 void CrowdStop::scanCallback(
