@@ -8,6 +8,17 @@ This project extends the ROS 2 Nav2 navigation stack with custom Behavior Tree p
 
 Built on the default Nav2 NavigateToPose pipeline using BehaviorTree.CPP, costmap-based obstacle avoidance, and Nav2 recovery behaviors. Tested using the TurtleBot3 Waffle platform in Gazebo simulation.
 
+## Intended Behavior
+
+The robot receives a navigation goal and travels to it while four behavior layers run concurrently in priority order:
+
+1. **Battery check** -- If battery drops below 15%, the robot abandons its current mission and returns to the docking station at (0, 0), with all safety behaviors still active during the return
+2. **Crowd halt** -- If >70% of lidar readings within 1.5m are blocked (dense crowd or bottleneck), the robot halts and waits for the area to clear
+3. **Obstacle slowdown** -- Within 0.6m of an obstacle, speed scales linearly down to 20% minimum -- closer means slower
+4. **Normal navigation** -- Otherwise, the robot follows its planned path using Nav2's default planner and controller with recovery behaviors
+
+These priorities are enforced by a `ReactiveFallback` node that re-evaluates from the top on every tick, so higher-priority conditions interrupt immediately.
+
 ## Custom BT Plugins
 
 | Plugin | Type | Description |
