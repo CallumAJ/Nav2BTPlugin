@@ -1,5 +1,11 @@
 # TODO
 
+## Open
+
+- Download Groot2 and load `custom_nav_tree.xml` to verify all 4 custom nodes render correctly
+
+- Export a visual diagram of the behavior tree from Groot2 for the final report/presentation
+
 ## Resolved
 
 - ~~Speed Limit May Not Affect DWB Controller~~ — Verified: Nav2's controller_server subscribes to `/speed_limit` and DWB's `setSpeedLimit()` delegates to the trajectory generator. The speed limit chain works correctly.
