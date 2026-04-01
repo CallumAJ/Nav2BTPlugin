@@ -1,17 +1,43 @@
 # TODO
 
-## Open
+## Groot2
+- Download and install Groot2
+- Load `custom_nav_tree.xml` and verify all 4 custom nodes render
+- Export a visual BT diagram for the report and poster
 
-- Download Groot2 and load `custom_nav_tree.xml` to verify all 4 custom nodes render correctly
+## Experimental Metrics
+- Run baseline trials with default Nav2 (no custom plugins)
+- Run trials with custom BT plugins enabled
+- Collect metrics: navigation time, speed profiles near obstacles, battery-triggered dock returns, crowd stop activations
+- Generate comparison plots (baseline vs custom system)
 
-- Export a visual diagram of the behavior tree from Groot2 for the final report/presentation
+## Final Report
+- Introduction and motivation
+- System architecture and BT design (include Groot2 diagram)
+- Plugin descriptions and implementation details
+- Experimental setup and results (baseline vs custom)
+- Discussion, limitations, and future work
+
+## Poster / Presentation
+- System diagram showing the BT structure
+- Key results and comparison plots
+- Demo screenshots or video from Gazebo/RViz
+
+## Demo
+- Prepare a live or recorded demo showing:
+  - Normal navigation with obstacle slowdown
+  - Crowd stop triggering
+  - Low battery dock return
+
+## Code Submission
+- Clean up repos
+- Ensure build and test instructions work from scratch
 
 ## Resolved
-
-- ~~Speed Limit May Not Affect DWB Controller~~ — Verified: Nav2's controller_server subscribes to `/speed_limit` and DWB's `setSpeedLimit()` delegates to the trajectory generator. The speed limit chain works correctly.
-- ~~Make CrowdStop proximity_distance Configurable~~ — Implemented as a BT input port in `crowd_stop.cpp`.
-- ~~Clean Up Stale project/ Directory~~ — Deleted `/workspaces/ros2_ws/project/`. Proposal PDF preserved in Nav2BTPlugin root.
-- ~~Add Unit Tests~~ — Added 11 gtest-based tests in `test/test_plugins.cpp` covering all 4 plugins: BatteryMonitor (3 tests), CrowdStop (3 tests), ReturnToDock (2 tests), ObstacleSlowdown (3 tests). All passing.
-- ~~CrowdStop Is Hard to Trigger~~ — Lowered `density_threshold` from 0.8 to 0.4 and increased `proximity_distance` from 1.0m to 1.5m in the behavior tree XML for practical testing.
-- ~~Push nav2_bt_project Changes~~ — Pushed to https://github.com/anthonytrieu/nav2_bt_project.
-- ~~Battery Simulator Crashes on Relaunch~~ — Added retry logic in `battery_simulator.py` that catches `RCLError` and `ExternalShutdownException`, shuts down cleanly, and re-initializes with a fresh context (up to 3 retries).
+- ~~Speed Limit May Not Affect DWB Controller~~ — Verified working
+- ~~Make CrowdStop proximity_distance Configurable~~ — Implemented as BT input port
+- ~~Clean Up Stale project/ Directory~~ — Deleted
+- ~~Add Unit Tests~~ — 11 gtest-based tests, all passing
+- ~~CrowdStop Is Hard to Trigger~~ — Tuned thresholds
+- ~~Push nav2_bt_project Changes~~ — Pushed
+- ~~Battery Simulator Crashes on Relaunch~~ — Added retry logic
