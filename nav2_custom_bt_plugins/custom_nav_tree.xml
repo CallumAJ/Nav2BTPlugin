@@ -25,7 +25,7 @@
       <Sequence>
         <!-- CrowdStop returns SUCCESS when safe (density below threshold), -->
         <!-- FAILURE when too crowded (density above threshold) -->
-        <CrowdStop density_threshold="0.4" proximity_distance="1.5"/>
+        <CrowdStop density_threshold="0.7" proximity_distance="1.5"/>
 
         <ObstacleSlowdown distance="0.6">
           <RecoveryNode number_of_retries="3" name="NavigateRecovery">
