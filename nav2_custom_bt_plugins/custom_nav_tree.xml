@@ -1,11 +1,30 @@
+<!--
+  Custom Navigation Behavior Tree
+  ================================
+  Uses a ReactiveFallback with two priority branches:
+
+  Priority 1 (Battery): Checked every tick. If the battery drops below 15%,
+    the robot stops normal navigation, sets the dock as its goal, and
+    navigates there. This takes precedence over everything else.
+
+  Priority 2 (Normal Nav): Active when battery is healthy. Before navigating,
+    CrowdStop checks if the area is too crowded (>70% of lidar beams blocked
+    within 1.5m). If safe, ObstacleSlowdown wraps the navigation pipeline
+    and reduces speed proportionally when obstacles are within 0.6m.
+
+  Both branches include a RecoveryNode that retries up to 3 times with
+  costmap clearing as the recovery action.
+-->
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
 
     <ReactiveFallback>
 
-      <!-- Priority 1: Low battery -> return to dock -->
+      <!-- Priority 1: Battery below 15% — override navigation and return to dock -->
       <Sequence>
+        <!-- BatteryMonitor returns SUCCESS when battery < threshold, activating this branch -->
         <BatteryMonitor threshold="0.15"/>
+        <!-- ReturnToDock parses "x;y;theta" and writes the dock pose to the blackboard as {goal} -->
         <ReturnToDock dock_pose="0.0;0.0;0.0"/>
         <RecoveryNode number_of_retries="3" name="DockRecovery">
           <PipelineSequence>
@@ -21,12 +40,15 @@
         </RecoveryNode>
       </Sequence>
 
-      <!-- Priority 2: Normal navigation with safety checks -->
+      <!-- Priority 2: Normal navigation with crowd and obstacle safety checks -->
       <Sequence>
-        <!-- CrowdStop returns SUCCESS when safe (density below threshold), -->
-        <!-- FAILURE when too crowded (density above threshold) -->
+        <!-- CrowdStop gates navigation: returns FAILURE (halts Sequence) if >70%
+             of lidar beams detect objects within 1.5m, SUCCESS otherwise -->
         <CrowdStop density_threshold="0.7" proximity_distance="1.5"/>
 
+        <!-- ObstacleSlowdown is a decorator: it publishes a speed limit before
+             ticking its child. Speed scales linearly from 100% at 0.6m to a
+             minimum of 20% at very close range -->
         <ObstacleSlowdown distance="0.6">
           <RecoveryNode number_of_retries="3" name="NavigateRecovery">
             <PipelineSequence>
