@@ -8,6 +8,23 @@
 namespace nav2_custom_bt_plugins
 {
 
+/**
+ * @brief BT condition node that monitors the robot's battery level.
+ *
+ * Subscribes to the /battery_state topic and compares the current battery
+ * percentage against a configurable threshold. Used as the first check in
+ * a ReactiveFallback: when the battery is low, this node returns SUCCESS
+ * to activate the docking sequence; otherwise it returns FAILURE so the
+ * fallback continues to normal navigation.
+ *
+ * BT Return Values:
+ *   SUCCESS  — battery is below threshold (triggers docking branch)
+ *   FAILURE  — battery is healthy or no data received yet
+ *
+ * Ports:
+ *   threshold (input, double) — battery level below which docking is triggered
+ *                                (e.g. 0.15 = 15%)
+ */
 class BatteryMonitor : public BT::ConditionNode
 {
 public:

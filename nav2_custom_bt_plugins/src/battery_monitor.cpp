@@ -39,7 +39,8 @@ BT::NodeStatus BatteryMonitor::tick()
   rclcpp::spin_some(node_);
 
   if (!battery_received_) {
-    // No battery data yet, assume battery is fine
+    // No battery data received yet — assume battery is OK and let the
+    // ReactiveFallback fall through to normal navigation (Priority 2).
     return BT::NodeStatus::FAILURE;
   }
 
@@ -47,10 +48,15 @@ BT::NodeStatus BatteryMonitor::tick()
     RCLCPP_WARN(node_->get_logger(),
       "BatteryMonitor: LOW BATTERY %.1f%% < threshold %.1f%%",
       battery_level_ * 100.0, threshold_ * 100.0);
-    return BT::NodeStatus::SUCCESS;  // Battery is low -> trigger dock sequence
+    // SUCCESS here means "condition is true" (battery IS low), which causes
+    // the parent Sequence to continue into the docking branch.
+    return BT::NodeStatus::SUCCESS;
   }
 
-  return BT::NodeStatus::FAILURE;  // Battery is fine
+  // FAILURE means "condition is false" (battery is healthy). In the
+  // ReactiveFallback this causes the tree to skip the docking branch
+  // and try the next child (normal navigation).
+  return BT::NodeStatus::FAILURE;
 }
 
 }

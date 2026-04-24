@@ -37,11 +37,14 @@ BT::PortsList CrowdStop::providedPorts()
 void CrowdStop::scanCallback(
   const sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
+  // Count how many laser readings fall within proximity_distance_ vs total valid
+  // readings. A high ratio indicates many nearby objects (i.e. a dense crowd).
   int close_count = 0;
   int valid_count = 0;
 
   for (size_t i = 0; i < msg->ranges.size(); ++i) {
     float range = msg->ranges[i];
+    // Filter out NaN/Inf and out-of-range readings from the lidar
     if (std::isfinite(range) && range >= msg->range_min && range <= msg->range_max) {
       valid_count++;
       if (range < proximity_distance_) {
@@ -50,6 +53,8 @@ void CrowdStop::scanCallback(
     }
   }
 
+  // Crowd density = fraction of valid laser beams that detect something nearby.
+  // e.g. 0.8 means 80% of beams see an object within proximity_distance_.
   if (valid_count > 0) {
     crowd_density_ = static_cast<double>(close_count) / static_cast<double>(valid_count);
   } else {
@@ -62,8 +67,9 @@ BT::NodeStatus CrowdStop::tick()
   // Process pending subscription callbacks
   rclcpp::spin_some(node_);
 
-  // SUCCESS = safe to proceed (density below threshold)
-  // FAILURE = too crowded, halt navigation
+  // In the behavior tree this node gates the navigation Sequence:
+  //   SUCCESS = density is acceptable, allow navigation to proceed
+  //   FAILURE = too crowded, the Sequence stops and navigation halts
   if (crowd_density_ > density_threshold_) {
     RCLCPP_WARN(node_->get_logger(),
       "CrowdStop: HIGH DENSITY %.2f > threshold %.2f - halting navigation",
