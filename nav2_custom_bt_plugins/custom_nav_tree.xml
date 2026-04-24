@@ -15,7 +15,7 @@
   Both branches include a RecoveryNode that retries up to 3 times with
   costmap clearing as the recovery action.
 -->
-<root main_tree_to_execute="MainTree">
+<root main_tree_to_execute="MainTree" BTCPP_format="3">
   <BehaviorTree ID="MainTree">
 
     <ReactiveFallback>
@@ -68,4 +68,52 @@
     </ReactiveFallback>
 
   </BehaviorTree>
+
+  <!-- Added For Groot ... Modify if any problems occur-->
+  <TreeNodesModel>
+    
+    <!-- Conditions-->
+    <Condition ID="BatteryMonitor">
+      <input_port name="threshold" type="double" default="0.15"/>
+    </Condition>
+
+
+    <Condition ID="CrowdStop">
+      <input_port name="density_threshold" type="double" default="0.0"/>
+      <input_port name="proximity_distance" type="double" default="1.0"/>
+    </Condition>
+
+    <!-- Actions-->
+    <Action ID="ReturnToDock">
+      <input_port name="dock_pose" type="std::string"/> <!-- adjust type as needed -->
+    </Action>
+
+    <Action ID="ComputePathToPose">
+      <input_port name="goal" type="PoseStamped"/>
+      <input_port name="planner_id" type="std::string" default="GridBased"/>
+      <output_port name="path" type="nav_msgs::msg::Path"/>
+    </Action>
+
+
+    <Action ID="FollowPath">
+      <input_port name="path" type="nav_msgs::msg::Path"/>
+      <input_port name="controller_id" type="std::string" default="FollowPath"/>
+    </Action>
+
+    <Action ID="ClearEntireCostmap">
+      <input_port name="service_name" type="std::string"/>
+    </Action>
+
+    <!--Decorator-->
+    <Decorator ID="ObstacleSlowdown">
+      <input_port name="distance" type="double" default="0.6"/>
+    </Decorator>
+
+    <!-- Control Nodes-->
+    <Control ID="RecoveryNode">
+      <input_port name="number_of_retries" type="int" default="3"/>
+    </Control>
+    <Control ID="PipelineSequence"/>
+
+  </TreeNodesModel>
 </root>
